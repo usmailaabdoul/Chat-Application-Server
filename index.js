@@ -1,13 +1,10 @@
-const express = require('express');
-const cors = require('cors')
-const bodyParser = require('body-parser');
+const createServer = require('./src/server');
+const setUpMongoose = require('./config/mongoose');
+const socketIo = require('./src/socketIo');
 
-const app = express();
-app.use(cors());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+const server = createServer()
 
-const server = require('http').createServer(app);
+const mongoUrl = 'mongodb://localhost/chatApp'
 
 const options = {
   cors: {
@@ -16,53 +13,20 @@ const options = {
   }
 }
 
-const io = require('socket.io')(server, options);
 
-const userHelper = require('./users')
+const io = require('socket.io')(server, options);
 
 const PORT = process.env.PORT || 5000;
 
-const router = require('./router');
+async function init() {
+  await setUpMongoose(mongoUrl);
 
+  return server;
+}
 
-io.on('connection', (socket) => {
-
-  socket.on('join', ({ name, room }, callback) => {
-
-    const { error, user } = userHelper.addUser({ id: socket.id, name, room })
-
-    if (error) return callback(error);
-
-    socket.emit('message', { user: 'admin', text: `${user.name}, welcome to the room ${user.room}` })
-    socket.broadcast.to(user.room).emit('message', { user: 'admin', text: `${user.name}, has joined!` });
-
-    socket.join(user.room);
-
-    io.to(user.room).emit('roomData', { room: user.room, users: userHelper.getUserInRoom(user.room) });
-
-    callback()
+init().then(server => {
+  server.listen(PORT, () => {
+    console.log(`app is running on port ${PORT}`);
+    socketIo(io)
   })
-
-  socket.on('sendMessage', (message, callback) => {
-    const user = userHelper.getUser(socket.id);
-
-    io.to(user.room).emit('message', { user: user.name, text: message });
-    io.to(user.room).emit('roomData', { room: user.room, users: userHelper.getUserInRoom(user.room) });
-
-    callback();
-  })
-
-  socket.on('disconnect', () => {
-    const user = userHelper.removeUser(socket.id);
-
-    if (user) {
-      io.to(user.room).emit('message', { user: 'admin', text: `${user.name}, has left` })
-    }
-  })
-});
-
-app.use(router);
-
-server.listen(PORT, () => {
-  console.log(`app is running on PORT ${PORT}`)
 })
