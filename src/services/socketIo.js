@@ -1,4 +1,5 @@
 const InboxModel = require('../models/inbox');
+const InboxService = require('../services/inbox');
 
 class SocketIoService {
   constructor(socket) {
@@ -13,25 +14,18 @@ class SocketIoService {
   }
 
   createInbox() {
-    this.socket.on('createInbox', ({ user, activeChat }, callback) => {
+    this.socket.on('createNewInbox', async ({ sender, reciever }, callback) => {
 
-      let inbox_id = `${user.id}${activeChat.id}`;
+      // let inbox_id = `${sender.id}${reciever.id}`;
 
-      // let inbox = {senderId: user._id, recieverId: reciever._id}
+      const newInbox = await InboxService.createInbox(sender, reciever);
+      let _inboxes = await InboxService.findInbox();
 
-      // const newInbox = await InboxModel.create(inbox);
-      // let _inboxs = await InboxModel.aggregate([
-      //   {
-      //     $lookup: {
-      //       from: 'genres', localField: 'genreId', foreignField: '_id', as: 'genre'
-      //     }
-      //   }
-      // ])
+      console.log({newInbox, _inboxes})
+      let _newInbox = _inboxes.find((i) => `${i._id}` === `${newInbox._id}`);
 
-      // let _newInbox = _inboxs.find((b) => `${b._id}` === `${newInbox._id}`);
-
-      console.log({ inbox_id })
-      this.socket.join(inbox_id)
+      console.log('id', _newInbox._id)
+      this.socket.join(_newInbox._id)
     })
   }
 
@@ -42,10 +36,10 @@ class SocketIoService {
   }
 
   sendMessage(io) {
-    this.socket.on('sendMessage', ({ inbox_id, message }, callback) => {
-      console.log({ inbox_id, message })
+    this.socket.on('sendMessage', ({ inboxId, message }, callback) => {
+      console.log({ inboxId, message })
 
-      io.to(inbox_id).emit(`${inbox_id}`, { message });
+      io.to(inboxId).emit(`${inboxId}`, { message });
     })
   }
 }

@@ -16,6 +16,10 @@ const InboxSchema = new mongoose.Schema({
   strict: true
 });
 
+// InboxSchema.set('toJSON', {
+//   virtuals: true
+// });
+
 const Inbox = mongoose.model('Inbox', InboxSchema, 'inboxs');
 
 module.exports = Inbox;
