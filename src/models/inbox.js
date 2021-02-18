@@ -11,15 +11,19 @@ const InboxSchema = new mongoose.Schema({
     ref: 'User',
     required: true,
   },
+  messages: {
+    type: Array,
+    default: [],
+  }
 }, {
   timestamps: true,
   strict: true
 });
 
-// InboxSchema.set('toJSON', {
-//   virtuals: true
-// });
+InboxSchema.set('toJSON', {
+  virtuals: true
+});
 
-const Inbox = mongoose.model('Inbox', InboxSchema, 'inboxs');
+const Inbox = mongoose.model('Inbox', InboxSchema, 'inboxes');
 
 module.exports = Inbox;

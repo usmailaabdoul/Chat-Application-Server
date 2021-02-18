@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const HttpStatus = require('http-status-codes');
 const UserService = require('../services/users');
+const InboxService = require('../services/inbox')
 const authGuard = require('../middleware/auth-guard');
 
 router.get('/users', async (req, res, next) => {
@@ -41,6 +42,16 @@ router.put('/user/:id', async (req, res, next) => {
   } catch (e) {
     console.log(e);
     return res.status(HttpStatus.StatusCodes.BAD_REQUEST).json('Unable to update user')
+  }
+})
+
+router.get('/user/inboxes/:id', async (req, res, next) => {
+  try {
+    let inboxes = await InboxService.getUserInboxes(req.params.id);
+    return res.status(HttpStatus.StatusCodes.OK).json(inboxes)
+  } catch (e) {
+    console.log(e);
+    return res.status(HttpStatus.StatusCodes.BAD_REQUEST).json('Unable to get inboxes')
   }
 })
 
