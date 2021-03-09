@@ -9,7 +9,7 @@ class InboxService {
 
     const inbox = await InboxModel.create(obj);
     
-    SocketIoService.createInbox(inbox.id)
+    // SocketIoService.createInbox(inbox.id)
     return inbox;
   }
 

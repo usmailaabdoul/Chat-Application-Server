@@ -11,9 +11,30 @@ const InboxSchema = new mongoose.Schema({
     ref: 'User',
     required: true,
   },
+  joined: {
+    senderSocketId: {
+      type: String,
+      default: null
+    },
+    recieverSocketId: {
+      type: String,
+      default: null
+    }
+  },
   messages: {
     type: Array,
     default: [],
+  },
+  notifications: {
+    user_id: {
+      type: mongoose.SchemaTypes.ObjectId,
+      ref: 'User',
+      default: null
+    },
+    unreads: {
+      type: Number,
+      default: 0,
+    }
   }
 }, {
   timestamps: true,
